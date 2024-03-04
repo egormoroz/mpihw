@@ -1,7 +1,5 @@
 ## Компиляция
 
-AMOGUS
-
 ```
 mkdir build
 cd build
