@@ -1,169 +1,194 @@
-## Компиляция
+## Задача 1. Потоки (процессы)
+
+### Лог
 
 ```
-mkdir build
-cd build
-cmake ../src
-cmake --build . --config Release
+$ mpirun -n 4 p1_hello
+Hello from processor ubuntu, rank 3 out of 4
+Hello from processor ubuntu, rank 2 out of 4
+Hello from processor ubuntu, rank 0 out of 4
+Hello from processor ubuntu, rank 1 out of 4
 ```
 
-## 1. Потоки
+## Задача 2. Сумма чисел
 
-### Описание
-Запуск указанного числа потоков и вывод номера каждого.
-
-Аргументы: `1.exe <кол-во потоков>`.
-
-Запуск:`.\Release\1.exe 16`.
-
-### Вывод
+### Лог
 
 ```
-hello from thread 2 / 16
-hello from thread 4 / 16
-hello from thread 5 / 16
-hello from thread 1 / 16
-hello from thread 6 / 16
-hello from thread 8 / 16
-hello from thread 3 / 16
-hello from thread 9 / 16
-hello from thread 11 / 16
-hello from thread 12 / 16
-hello from thread 13 / 16
-hello from thread 14 / 16
-hello from thread 15 / 16
-hello from thread 16 / 16
-hello from thread 7 / 16
-hello from thread 10 / 16
-all threads finished working
+$ mpirun -n 1 p2_sum 10
+result      354 took 0.000006s
+$ mpirun -n 2 p2_sum 10
+result      354 took 0.000016s
+
+$ mpirun -n 1 p2_sum 1000
+result    -9666 took 0.000006s
+$ mpirun -n 2 p2_sum 1000
+result    -9666 took 0.000075s
+
+$ mpirun -n 1 p2_sum 10000000
+result -1149040 took 0.005656s
+$ mpirun -n 2 p2_sum 10000000
+result -1149040 took 0.005722s
+
+$ mpirun -n 1 p2_sum 1000000000
+result  12037951 took 0.561324s
+$ mpirun -n 2 p2_sum 1000000000
+result  12037951 took 0.547573s
+
+$ mpirun -n 1 p2_sum 10000000000
+result  10221467 took 1.192339s
+$ mpirun -n 2 p2_sum 10000000000
+result  10221467 took 0.765406s
 ```
 
-## 2. Сумма чисел
+### В виде таблицы:
 
-### Описание
+| N           | Процессы | Время (сек) |
+| ----------- | -------- | ----------- |
+| 10          | 1        | 0.000006    | 
+| 1000        | 1        | 0.000006    | 
+| 10000000    | 1        | 0.005656    | 
+| 1000000000  | 1        | 0.561324    | 
+| 10000000000 | 1        | 1.192339    | 
+| 10          | 2        | 0.000016    | 
+| 1000        | 2        | 0.000075    | 
+| 10000000    | 2        | 0.005722    | 
+| 1000000000  | 2        | 0.547573    | 
+| 10000000000 | 2        | 0.765406    | 
 
-Создание массива размера `final_size` и замер времени исполнения для суммирования чисел подмассивов
-длины `len_i = min(mult_step^i * init_size, final_size), i = 1, 2, ...`.
 
-Аргументы: `2.exe <init_size> <final_size> <mult_step>`. 
+## Задача 3. Частная производная функции, заданной на сетке
 
-Запуск:`.\Release\2.exe 100 1000000000 10`.
-
-### Вывод
-
-Время растёт линейно с количеством чисел.
-
-```
-generating random array with 1000000000 elements...
-size 100 time 0.000ms
-size 1000 time 0.004ms
-size 10000 time 0.035ms
-size 100000 time 0.037ms
-size 1000000 time 0.344ms
-size 10000000 time 4.951ms
-size 100000000 time 36.287ms
-size 1000000000 time 339.579ms
-```
-
-## 3. Частная производная функции, заданной на сетке
-
-### Описание
-
-Для функции `f(x, y)`, заданной на сетке `n_i x n_i`, вычислить частные производные `df/dy` методом центральных разностей: `df(x_i, y_i)/dy ~= (df(x_i, y_{i+1) - df(x_i, y_{i-1})) / 2`.
-
-Аргументы: `3.exe <init_size> <final_size> <mult_step>`.
-
-Запуск: `.\Release\3.exe 10 20000 2`
-
-### Вывод
-
-Время зависит квадратично от размера таблицы (или линейно с кол-вом элементов).
+### Лог
 
 ```
-size 10 time 0.000ms
-size 20 time 0.000ms
-size 40 time 0.001ms
-size 80 time 0.007ms
-size 160 time 0.493ms
-size 320 time 1.041ms
-size 640 time 2.179ms
-size 1280 time 7.901ms
-size 2560 time 5.950ms
-size 5120 time 19.773ms
-size 10240 time 73.206ms
-size 20000 time 307.234ms
+$ mpirun -n 1 p3_deriv 1000
+took 0.000781s
+$ mpirun -n 2 p3_deriv 1000
+took 0.000924s
+
+$ mpirun -n 1 p3_deriv 10000
+took 0.112738s
+$ mpirun -n 2 p3_deriv 10000
+took 0.126219s
+
+$ mpirun -n 1 p3_deriv 20000
+took 0.463885s
+$ mpirun -n 2 p3_deriv 20000
+took 0.472845s
 ```
 
-## 4. Произведение двух матриц
+### В виде таблицы:
+
+| N       | Процессы | Время (сек) |
+| ------- | -------- | ----------- |
+| 1000    | 1        | 0.000781    | 
+| 10000   | 1        | 0.112738    | 
+| 20000   | 1        | 0.463885    | 
+| 1000    | 2        | 0.000924    | 
+| 10000   | 2        | 0.126219    | 
+| 20000   | 2        | 0.472845    | 
 
 
-### Описание
 
-Создание двух квадратных матриц размера `final_size` и замер времени исполнения 
-для умножения подматриц размера `n_i = min(mult_step^i * init_size, final_size), i = 1, 2, ...`.
+## Задача 4. Произведение двух матриц
 
-Аргументы: `4.exe <init_size> <final_size> <mult_step>`.
-
-Запуск: `.\Release\4.exe 10 2560 2`.
-
-Примечание: мой процессор имеет суммарно ~25мб кэша, в который вмещаются полностью две квадратные матрицы типа float размера 1280: 1280^2 * 4 * 2 байт равно 12.5 мегабайт. Две матрицы размера 2560 уже занимают вместе 50МБ и потому не помещаются полностью в кэше (учитывая, что надо где-то хранить результат произведения C).
-
-### Вывод
-
-Матрица B записана по столбцам (column major order), либо заранее транспонирована. Примерно кубическая зависимость времени от размера (размер x2, время x8).
-
-```
-size 10 time 0.001ms
-size 20 time 0.005ms
-size 40 time 0.045ms
-size 80 time 0.123ms
-size 160 time 1.895ms
-size 320 time 11.840ms
-size 640 time 116.349ms
-size 1280 time 913.791ms
-size 2560 time 8142.543ms
-```
-
-Матрица B записана по строкам (row major order). Примерно кубическая зависимость времени от размера (размер x2, время x8) для size <= 1280. На последнем шаге время увеличилось в ~39 раз.
+### Лог
 
 ```
-size 10 time 0.001ms
-size 20 time 0.018ms
-size 40 time 0.016ms
-size 80 time 0.764ms
-size 160 time 1.260ms
-size 320 time 16.018ms
-size 640 time 143.516ms
-size 1280 time 2090.220ms
-size 2560 time 82031.648ms
+$ mpirun -n 1 p4_matmul 512
+trace -229.1460 took 0.007862s
+$ mpirun -n 2 p4_matmul 512
+trace -229.1460 took 0.003709s
+$ mpirun -n 4 p4_matmul 512
+trace -229.1460 took 0.004140s
+
+$ mpirun -n 1 p4_matmul 1024
+trace -297.4893 took 0.070104s
+$ mpirun -n 2 p4_matmul 1024
+trace -297.4893 took 0.036013s
+$ mpirun -n 4 p4_matmul 1024
+trace -297.4893 took 0.031262s
+
+$ mpirun -n 1 p4_matmul 2048
+trace  121.0394 took 0.591009s
+$ mpirun -n 2 p4_matmul 2048
+trace  121.0394 took 0.315137s
+$ mpirun -n 4 p4_matmul 2048
+trace  121.0394 took 0.191180s
+
+$ mpirun -n 1 p4_matmul 4096
+trace -1705.1299 took 5.292815s
+$ mpirun -n 2 p4_matmul 4096
+trace -1705.1299 took 2.617982s
+$ mpirun -n 4 p4_matmul 4096
+trace -1705.1299 took 1.827324s
 ```
 
-## 5. Метод Гаусса для СЛАУ
+### В виде таблицы:
 
-Создание квадратной матрицы A размера `final_size` с диагональным преобладанием и вектора-столбца b. 
-Замер времени исполнения метода гаусса для решения СЛАУ `A_i x = b_i` с `n_i = min(mult_step^i * init_size, final_size), i = 1, 2, ...` переменных.
+| N       | Процессы | Время (сек) |
+| ------- | -------- | ----------- |
+| 512     | 1        | 0.007862    | 
+| 1024    | 1        | 0.070104    | 
+| 2048    | 1        | 0.591009    | 
+| 4096    | 1        | 5.292815    | 
+| 512     | 2        | 0.003709    | 
+| 1024    | 2        | 0.036013    | 
+| 2048    | 2        | 0.315137    | 
+| 4096    | 2        | 2.617982    | 
+| 512     | 4        | 0.004140    | 
+| 1024    | 4        | 0.031262    | 
+| 2048    | 4        | 0.191180    | 
+| 4096    | 4        | 1.827324    | 
 
-### Описание
 
-Аргументы: `5.exe <init_size> <final_size> <mult_step>`.
 
-Запуск: `.\Release\5.exe 10 10000 2`.
+## Задача 5. Метод Гаусса
 
-Примечание: аналогичная ситуация как в умножении матриц, только здесь матрица одна вместо трёх, поэтому можно вместить больший размер.
-
-### Вывод
-
+### Лог
 ```
-size 10 time 0.000ms
-size 20 time 0.010ms 
-size 40 time 0.060ms 
-size 80 time 0.439ms 
-size 160 time 0.600ms
-size 320 time 4.678ms
-size 640 time 38.912ms
-size 1280 time 310.091ms
-size 2560 time 2634.607ms
-size 5120 time 23998.877ms
-size 10000 time 203329.188ms
+$ mpirun -n 1 p5_gauss 512
+sum  639.874695 took 0.006413s
+$ mpirun -n 1 p5_gauss 1024
+sum  1279.875366 took 0.059284s
+$ mpirun -n 1 p5_gauss 2048
+sum  2559.874756 took 0.467746s
+$ mpirun -n 1 p5_gauss 4096
+sum  5119.882324 took 5.012211s
+
+$ mpirun -n 2 p5_gauss 512
+sum  639.874695 took 0.002791s
+$ mpirun -n 2 p5_gauss 1024
+sum  1279.875366 took 0.039916s
+$ mpirun -n 2 p5_gauss 2048
+sum  2559.874756 took 0.323846s
+$ mpirun -n 2 p5_gauss 4096
+sum  5119.882324 took 4.172616s
+
+$ mpirun -n 4 p5_gauss 512
+sum  639.874695 took 0.002981s
+$ mpirun -n 4 p5_gauss 1024
+sum  1279.875366 took 0.021491s
+$ mpirun -n 4 p5_gauss 2048
+sum  2559.874756 took 0.213488s
+$ mpirun -n 4 p5_gauss 4096
+sum  5119.882324 took 3.594501s
 ```
 
+### В виде таблицы:
+
+| N       | Процессы | Время (сек) |
+| ------- | -------- | ----------- |
+| 512     | 1        | 0.006413    | 
+| 1024    | 1        | 0.059284    | 
+| 2048    | 1        | 0.467746    | 
+| 4096    | 1        | 5.012211    | 
+| 512     | 2        | 0.002791    | 
+| 1024    | 2        | 0.039916    | 
+| 2048    | 2        | 0.323846    | 
+| 4096    | 2        | 4.172616    | 
+| 512     | 4        | 0.002981    | 
+| 1024    | 4        | 0.021491    | 
+| 2048    | 4        | 0.213488    | 
+| 4096    | 4        | 3.594501    | 
